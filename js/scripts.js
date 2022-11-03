@@ -34,13 +34,13 @@ function displayUsers() {
         document.getElementById('gallery').insertAdjacentHTML('beforeend', html);
 
 		document.querySelector('#gallery .card:last-child').addEventListener('click', (e) => {
-			let userIndex = e.currentTarget.dataset.user;
-			showUserModal(users[userIndex]);
+			let userIndex = parseInt(e.currentTarget.dataset.user);
+			showUserModal(users[userIndex], userIndex);
 		});
 	}
 }
 
-function showUserModal(user) {
+function showUserModal(user, index) {
 	// Format phone if 10 digits long
 	let cellPhone = user.cell.replace(/\D/g,'');
 	if(cellPhone.length === 10) {
@@ -66,6 +66,12 @@ function showUserModal(user) {
 
     document.querySelector('.modal .modal-info-container').innerHTML = html;
     document.querySelector('.modal-container').style.display = "block";
+
+    // Update next/prev buttons
+    let prevIndex = (index === 0) ? userCount - 1 : index - 1;
+    let nextIndex = (index === (userCount - 1)) ? 0 : (index + 1);
+    document.getElementById('modal-prev').dataset.userIndex = prevIndex;
+    document.getElementById('modal-next').dataset.userIndex = nextIndex;
 }
 
 function hideUserModal() {
@@ -84,6 +90,11 @@ function filterUsers(query) {
 	}
 }
 
+function changeModalPage(event) {
+	let userIndex = parseInt(event.currentTarget.dataset.userIndex);
+	showUserModal(users[userIndex], userIndex);
+}
+
 document.getElementById('modal-close-btn').addEventListener('click', hideUserModal);
 
 document.getElementById('search-input').addEventListener('input', (e) => {
@@ -91,3 +102,5 @@ document.getElementById('search-input').addEventListener('input', (e) => {
 	filterUsers(query);
 });
 
+document.getElementById('modal-prev').addEventListener('click', changeModalPage);
+document.getElementById('modal-next').addEventListener('click', changeModalPage);
