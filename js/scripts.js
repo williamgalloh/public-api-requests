@@ -15,6 +15,7 @@ fetch('https://randomuser.me/api/?nat=US&results=' + userCount)
 	});
 
 function displayUsers() {
+
 	// Build each user's html
 	for( let i = 0; i < users.length; i++) {
 		let user = users[i];
@@ -71,5 +72,22 @@ function hideUserModal() {
 	document.querySelector('.modal-container').style.display = "none";
 }
 
+function filterUsers(query) {
+	query = query.toLowerCase();
+	for( let i = 0; i < users.length; i++) {
+		let user = users[i];
+		if(query !== "" && !user.name.first.toLowerCase().includes(query) && !user.name.last.toLowerCase().includes(query)) {
+			document.querySelector('[data-user="' + i + '"]').style.display = "none";
+		} else {
+			document.querySelector('[data-user="' + i + '"]').style.display = "flex";
+		} 
+	}
+}
+
 document.getElementById('modal-close-btn').addEventListener('click', hideUserModal);
+
+document.getElementById('search-input').addEventListener('input', (e) => {
+	let query = document.getElementById('search-input').value;
+	filterUsers(query);
+});
 
