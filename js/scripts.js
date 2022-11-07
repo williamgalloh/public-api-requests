@@ -1,20 +1,30 @@
 // Initialize number of users to get
 const userCount = 12;
 
+// Initialize nationlity of users
+const userNat = "US";
+
 // Initialize variable that will hold user data
+let originalUsers = [];
 let users = [];
 
 // Get users from API
-fetch('https://randomuser.me/api/?nat=US&results=' + userCount)
+fetch('https://randomuser.me/api/?nat=' + userNat + '&results=' + userCount)
 	.then( response => response.json() )
 	.then((data) => {
 		if(data.results) {
-			users = data.results;
+			// Save the original user data to work against
+			originalUsers = data.results;
+			// Populate the user variable that will be used to manipulate the users displayed
+			users = [...originalUsers];
 			displayUsers();
 		}
 	});
 
+// Display each user's card on the page
 function displayUsers() {
+	// clear
+	document.getElementById('gallery').innerHTML = "";
 
 	// Build each user's html
 	for( let i = 0; i < users.length; i++) {
@@ -68,8 +78,8 @@ function showUserModal(user, index) {
     document.querySelector('.modal-container').style.display = "block";
 
     // Update next/prev buttons
-    let prevIndex = (index === 0) ? userCount - 1 : index - 1;
-    let nextIndex = (index === (userCount - 1)) ? 0 : (index + 1);
+    let prevIndex = (index === 0) ? users.length - 1 : index - 1;
+    let nextIndex = (index === (users.length - 1)) ? 0 : (index + 1);
     document.getElementById('modal-prev').dataset.userIndex = prevIndex;
     document.getElementById('modal-next').dataset.userIndex = nextIndex;
 }
@@ -79,28 +89,36 @@ function hideUserModal() {
 }
 
 function filterUsers(query) {
-	query = query.toLowerCase();
-	for( let i = 0; i < users.length; i++) {
-		let user = users[i];
-		if(query !== "" && !user.name.first.toLowerCase().includes(query) && !user.name.last.toLowerCase().includes(query)) {
-			document.querySelector('[data-user="' + i + '"]').style.display = "none";
-		} else {
-			document.querySelector('[data-user="' + i + '"]').style.display = "flex";
-		} 
+	if(query != "") {
+		query = query.toLowerCase();
+		// Get a fresh copy of the original users to work with
+		users = [...originalUsers];
+
+		// Filter to get only the users who match the search query
+		users = users.filter((user) => {
+			return user.name.first.toLowerCase().includes(query) || user.name.last.toLowerCase().includes(query);
+		});
+	} else {
+		users = [...originalUsers];
 	}
+	displayUsers();
 }
 
+// Navigate back and forth inside the modal
 function changeModalPage(event) {
 	let userIndex = parseInt(event.currentTarget.dataset.userIndex);
 	showUserModal(users[userIndex], userIndex);
 }
 
+// Hide user modal when clicking on the close button
 document.getElementById('modal-close-btn').addEventListener('click', hideUserModal);
 
+// Filter users when searching
 document.getElementById('search-input').addEventListener('input', (e) => {
 	let query = document.getElementById('search-input').value;
 	filterUsers(query);
 });
 
+// Navigate back and forth inside the modal
 document.getElementById('modal-prev').addEventListener('click', changeModalPage);
 document.getElementById('modal-next').addEventListener('click', changeModalPage);
